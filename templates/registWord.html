@@ -1,0 +1,259 @@
+{% extends "base.html" %}
+
+{% block title %}
+
+{% endblock %}
+
+{% block content %}
+
+<style>
+    select[name="word_category"] {
+        width: 200px; /* 望む幅に設定 */
+    }
+</style>
+
+<div class="content">
+    <!-- 語句登録フォーム -->
+    <form action="/registWord" method="post">
+        <label for="word">語句:</label>
+        <input type="text" id="word" required>
+        <br>
+        <label for="word_mean">語句の意味:</label>
+        <input type="text" id="word_mean" required>
+        <br>
+        <label for="word_mean">カテゴリ:</label>
+            <select name="word_category" id="word_category">
+                {% for category in word_category %}
+                <option value="{{ category._id }}">{{ category.category }}</option>
+                {% endfor %}
+            </select>
+        <br>
+        <button type="button" onclick="registWord()" style="background-color: green;">登録</button>
+    </form>
+
+    <!-- 登録メッセージ -->
+    <ul>
+        {% if message %}
+            <p>{{ message }}</p>
+        {% endif %}
+    </ul>
+
+    <!-- 一括保存ボタン -->
+    <button onclick="saveAllWordChanges()" id="saveAllButton" style="background-color: grey;">すべて保存</button>
+
+    <!-- 一括削除ボタン -->
+    <button onclick="deleteSelectedWords()" id="deleteButton" disabled>選択して削除</button>
+
+    <!-- 単語表 -->
+    <h2>登録済みの単語</h2>
+    <table>
+        <thead>
+            <tr>
+                <th></th> <!-- チェックボックス用の列 -->
+                <th>単語</th>
+                <th>意味</th>
+                <th>カテゴリ</th>
+                <th>保存</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for word in words %}
+            <tr data-id="{{ word._id }}">
+                <td>
+                    <input type="checkbox" class="wordCheckbox" data-id="{{ word._id }}" onchange="updateDeleteButton()">
+                </td>
+                <td contenteditable="true" data-id="{{ word._id }}" data-field="word">{{ word.word }}</td>
+                <td contenteditable="true" data-id="{{ word._id }}" data-field="word_mean">{{ word.word_mean }}</td>
+                <td>
+                    <select name="word_category" id="word_category_Edit">
+                        {% for category in word_category %}
+                            <option value="{{ category._id }}" {% if word.word_category == category._id %}selected{% endif %}>
+                                {{ category.category }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    
+                </td>
+                <td>
+                    <button onclick="saveWordChanges('{{ word._id }}')">保存</button>
+                    <button onclick="deleteWord('{{ word._id }}')" style="background-color: red;">削除</button>
+                </td>
+                
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+
+    <form action="/logout">
+        <button type="submit" style="background-color: gray;">Logout</button>
+    </form>
+
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // 編集可能な各セルにイベントリスナーを設定
+        var editableCells = document.querySelectorAll('td[contenteditable="true"]');
+        editableCells.forEach(function(cell) {
+            cell.addEventListener('input', function() {
+                // 編集が発生した場合、ボタンの色を更新
+                updateSaveAllButtonColor();
+            });
+        });
+    });
+
+    function registWord(word, word_mean, word_category) {
+        var registingWord = document.getElementById("word").value;
+        var registingMeaning = document.getElementById("word_mean").value;
+        var registingCategory = document.getElementById("word_category").value;
+
+        console.log("word:", registingWord, "word_mean:", registingMeaning, "word_category:", registingCategory)
+
+        // Ajaxを使ってサーバーにデータを送信
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", "/registWord", true);
+        xhr.setRequestHeader("Content-Type", "application/json");
+        xhr.send(JSON.stringify({ word: registingWord, word_mean: registingMeaning, word_category: registingCategory }));
+
+        xhr.onload = function() {
+            console.log(xhr.status);
+            console.log("Sending data:", { word: registingWord, word_mean: registingMeaning, word_category: registingCategory });
+            if (xhr.status == 200) {
+                alert("語句が登録されました");
+                location.reload(); // ページをリロード
+            } else {
+                alert("登録に失敗しました");
+                var response = JSON.parse(xhr.responseText);
+                console.log("Error:", xhr.responseText);
+            }
+        };
+    }
+
+    function saveWordChanges(id) {
+        var editedWord = document.querySelector(`[data-id='${id}'][data-field='word']`).innerText;
+        var editedMeaning = document.querySelector(`[data-id='${id}'][data-field='word_mean']`).innerText;
+        var editedCategory = document.querySelector(`tr[data-id='${id}'] select`).value;
+
+        // Ajaxを使ってサーバーにデータを送信
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", "/saveWordChanges", true);
+        xhr.setRequestHeader("Content-Type", "application/json");
+        xhr.send(JSON.stringify({ id: id, word: editedWord, word_mean: editedMeaning, word_category: editedCategory }));
+
+        xhr.onload = function() {
+            if (xhr.status == 200) {
+                alert("変更が保存されました");
+            } else {    
+                alert("保存に失敗しました");
+                console.log("Error:", xhr.responseText);
+            }
+            location.reload(); // ページをリロード
+        };
+    }
+
+    function saveAllWordChanges() {
+        var rows = document.querySelectorAll('table tbody tr');
+        var wordsData = [];
+    
+        rows.forEach(function(row) {
+            var id = row.getAttribute('data-id');
+            var word = row.querySelector('[data-field="word"]').innerText;
+            var meaning = row.querySelector('[data-field="word_mean"]').innerText;
+            var category = row.querySelector('select').value;
+    
+            wordsData.push({ id: id, word: word, word_mean: meaning, word_category: category });
+        });
+    
+        // Ajaxを使ってサーバーにデータを送信
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", "/saveAllWordChanges", true);
+        xhr.setRequestHeader("Content-Type", "application/json");
+        xhr.send(JSON.stringify({ words: wordsData }));
+    
+        xhr.onload = function() {
+            if (xhr.status == 200) {
+                alert("すべての変更が保存されました");
+            } else {    
+                alert("保存に失敗しました");
+                console.log("Error:", xhr.responseText);
+            }
+            location.reload(); // ページをリロード
+        };
+        
+        // 保存後、ボタンの色を元に戻す
+        var saveAllButton = document.getElementById('saveAllButton');
+        saveAllButton.style.backgroundColor = 'grey';
+    }
+
+    function updateSaveAllButtonColor() {
+        // まとめて保存ボタンの色を変更
+        var saveAllButton = document.getElementById('saveAllButton');
+        saveAllButton.style.backgroundColor = 'blue';
+    }
+    
+
+    function deleteWord(id) {
+        if (!confirm("本当に削除しますか？")) {
+            return; // キャンセルされた場合は何もしない
+        }
+
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", "/deleteWord", true);
+        xhr.setRequestHeader("Content-Type", "application/json");
+        xhr.send(JSON.stringify({ id: id }));
+
+        xhr.onload = function() {
+            if (xhr.status == 200) {
+                alert("削除されました");
+            } else {
+                alert("削除に失敗しました");
+            }
+            location.reload(); // ページをリロード
+        };
+    }
+
+    function updateDeleteButton() {
+        // チェックボックスが一つでも選択されているか確認
+        var checkboxes = document.querySelectorAll('.wordCheckbox');
+        var isAnyChecked = Array.from(checkboxes).some(checkbox => checkbox.checked);
+    
+        // 一括削除ボタンの状態を更新
+        document.getElementById('deleteButton').disabled = !isAnyChecked;
+    }
+    
+    function deleteSelectedWords() {
+        // 選択された単語のIDを取得
+        var selectedWordIds = [];
+        var checkboxes = document.querySelectorAll('.wordCheckbox');
+        checkboxes.forEach((checkbox, index) => {
+            if (checkbox.checked) {
+                // ここでIDを取得し、selectedWordIdsに追加する
+                var wordId = checkbox.getAttribute('data-id');
+                selectedWordIds.push(wordId);
+            }
+            if (selectedWordIds.length === 0) {
+                alert("削除する単語を選択してください。");
+                return;
+            }
+        });
+    
+        // Ajaxでサーバーに削除リクエストを送信
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", "/deleteWords", true);
+        xhr.setRequestHeader("Content-Type", "application/json");
+        xhr.send(JSON.stringify({ word_ids: selectedWordIds }));
+
+        xhr.onload = function() {
+            if (xhr.status == 200) {
+                alert("削除されました");
+            } else {
+                alert("削除に失敗しました");
+            }
+            location.reload(); // ページをリロード
+        };
+    }
+    
+</script>
+
+{% endblock %}

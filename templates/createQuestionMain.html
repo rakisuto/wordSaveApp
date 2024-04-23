@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="content">
+    <div class="start-container">
+        <p>登録済みの単語数: {{ words_count }}語</p>
+        <select id="questionCount">
+            {% for i in range(3, words_count + 1) %}
+            <option value="{{ i }}">{{ i }}</option>
+            {% endfor %}
+        </select>
+        <button type="button" onclick="showQuestion_beginning()">問題を解く(はじめから)</button>
+        <button type="button" onclick="showQuestion_next()" {{ 'disabled' if not session_existence else '' }}>問題を解く(つづきから)</button>
+    </div>
+</div>
+
+{{ message }}
+
+<script>
+    function showQuestion_beginning() {
+        // 選択されたカウントを取得
+        var selectedCount = document.getElementById('questionCount').value;
+    
+        // 新しいフォーム要素を作成
+        var form = document.createElement('form');
+        form.action = '/solveQuestions';
+        form.method = 'POST';
+    
+        // 選択されたカウントをフォームに追加
+        var countInput = document.createElement('input');
+        countInput.type = 'hidden';
+        countInput.name = 'count';
+        countInput.value = selectedCount;
+        form.appendChild(countInput);
+    
+        // フォームをドキュメントに追加し、送信
+        document.body.appendChild(form);
+        form.submit();
+    }
+
+    function showQuestion_next() {
+        window.location.href = '/solveQuestions';
+    }
+</script>
+    
+{% endblock %}

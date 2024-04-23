@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}
+Add Hash
+{% endblock %}
+
+{% block content %}
+    <div class="content">
+        {% if hash_value %}
+        <p>生成されたハッシュ値: {{ hash_value }}</p>
+        {% endif %}
+
+        {% if message %}
+        <p>{{ message }}</p>
+        {% endif %}
+
+        <form action="/addHash" method="post">
+            <button type="submit" name="action" value="generate">生成</button>
+            <button type="submit" name="action" value="register">登録</button>
+        </form>
+    </div>
+{% endblock %}

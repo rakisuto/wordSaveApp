@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style/base.css') }}">
+</head>
+<body>
+    <!-- ハンバーガーメニュー -->
+        <header class="header">
+          <div class="navtext-container">
+            <div class="navtext">This is 辞書</div>
+          </div>
+          <input type="checkbox" class="menu-btn" id="menu-btn">
+          <label for="menu-btn" class="menu-icon"><span class="navicon"></span></label>
+          <ul class="menu">
+            <li><a href="/main">メインページへ</a></li>
+            <li><a href="/registWord">語句登録ページへ</a></li>
+            <li><a href="/addHash">ハッシュ値登録ページへ</a></li>
+            <li><a href="/addCategory">カテゴリ登録ページへ</a></li>
+            <li><a href="/createQuestionMain">問題作成ページへ</a></li>
+          </ul>
+      
+        </header>
+
+    {% block content %}
+    {% endblock %}
+
+    <script>
+        // ここに共通のJavaScriptを記述
+    </script>
+</body>
+</html>

@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block title %}
+Add category
+{% endblock %}
+
+{% block content %}
+<div class="content">
+    <!-- 語句登録フォーム -->
+    <form action="/addCategory" method="post" id="categoryForm">
+        <label for="category">カテゴリ:</label>
+        <input type="text" id="category" name="category" required>
+        <br>
+        <button type="submit" style="background-color: green;">登録</button>
+    </form>
+
+    <!-- 登録メッセージ -->
+    <ul>
+        {% if message %}
+            <p>{{ message }}</p>
+        {% endif %}
+    </ul>
+
+    <!-- カテゴリ表 -->
+    <h2>登録済みのカテゴリ</h2>
+    <table>
+        <thead>
+            <tr>
+                
+                <th>カテゴリ名</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for category in categories %}
+            <tr>
+                <td contenteditable="true" data-id="{{ category._id }}" data-field="category">{{ category.category }}</td>
+                <td>
+                    <button onclick="saveCategoryChanges('{{ category._id }}')">保存</button>
+                </td>
+            </tr>
+            {% endfor %} 
+        </tbody>
+    </table>
+</div>
+
+<script>
+    document.getElementById('categoryForm').addEventListener('submit', function(event) {
+        event.preventDefault(); // フォームの通常の送信を防止
+        addCategory();
+    });
+
+    function addCategory(category) {
+        var registingCategory = document.getElementById("category").value;
+
+        // Ajaxを使ってサーバーにデータを送信
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", "/addCategory", true);
+        xhr.setRequestHeader("Content-Type", "application/json");
+        xhr.send(JSON.stringify({ category: registingCategory }));
+
+        xhr.onload = function() {
+            console.log(xhr.status);
+            console.log("Sending data:", { category: registingCategory });
+            if (xhr.status == 200 && xhr.readyState === 4) {
+                alert("カテゴリが登録されました");
+                location.reload(); // ページをリロード
+            } else {
+                alert("登録に失敗しました");
+                var response = JSON.parse(xhr.responseText);
+                console.log("Error:", xhr.responseText);
+            }
+        };
+    }
+
+    function saveCategoryChanges(id) {
+        var editedCategory = document.querySelector(`[data-id='${id}'][data-field='category']`).innerText;
+
+        // Ajaxを使ってサーバーにデータを送信
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", "/saveCategoryChanges", true);
+        xhr.setRequestHeader("Content-Type", "application/json");
+        xhr.send(JSON.stringify({ id: id, category: editedCategory }));
+
+        xhr.onload = function() {
+            if (xhr.status == 200) {
+                alert("変更が保存されました");
+            } else {
+                alert("保存に失敗しました");
+                console.log("Error:", xhr.responseText);
+            }
+            location.reload(); // ページをリロード
+        };
+    }
+</script>
+
+{% endblock %}

@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="content">
+    <div id="popup-container" style="display: none;">
+        <div id="popup-content">
+          <p id="popup-message">正解/不正解</p>
+        </div>
+    </div>
+
+    <div class="question-container" style="display: block;">
+        <p>回答数:{{ question_index }}/{{ question_count }}</p>
+        <h2>次の語句の意味はどれか。</h2>
+        <p class="quiz-word" data-id="{{ question_sets.question_word_id}}" correct="{{ question_sets.correct }}">{{ question_sets.question_word }}</p>
+        <form id="answerForm" action="/submitAnswer" method="post">
+            <div class="quiz-choices">
+                {% for choice in question_sets.choices %}
+                <div class="choice-container">
+                    <input type="radio" id="choice_{{ loop.index }}" name="answer" value="{{ choice }}">
+                    <label for="choice_{{ loop.index }}">{{ choice }}</label>
+                </div>
+                {% endfor %}
+            </div>
+            <button type="button" onclick="checkAnswer()">回答する</button>
+        </form>
+        <p>この語句の正解数</p>
+        <p class="quiz_word_answer_count" data-id="{{ question_sets.count_correct }}">{{ question_sets.count_correct }}</p>
+        <p>この語句の不正回数</p>
+        <p class="quiz_word_answer_count" data-id="{{ question_sets.count_incorrect }}">{{ question_sets.count_incorrect }}</p>
+    </div>
+</div>
+
+<script>
+
+    function checkAnswer() {
+        // var questionContainer = buttonClicked.closest('.question-container');
+        // var quizWordElement  = questionContainer.querySelector('.quiz-word');
+        var correctAnswer = "{{ question_sets.correct }}";
+        var selectedAnswer = document.querySelector('input[name="answer"]:checked').value;
+
+        // 回答結果を格納
+        var answerResult = ( selectedAnswer === correctAnswer )
+
+        if (answerResult) {
+            showPopup("正解です！");
+        } else {
+            showPopup("不正解です。");
+        }
+        // カウント実行
+        answerResultCount(document.querySelector('.quiz-word').dataset.id, answerResult);
+        // showPopup終了後、フォームを送信
+        setTimeout(function() {
+            document.getElementById('answerForm').submit();
+            }, 3000);  // ここでは3秒後に設定
+    }
+
+    function showPopup(message) {
+        var popupContainer = document.getElementById('popup-container');
+        var popupMessage = document.getElementById('popup-message');
+        
+        // メッセージを設定
+        popupMessage.textContent = message;
+      
+        // ポップアップを表示してフェードイン
+        popupContainer.style.display = 'flex';
+        popupContainer.style.zIndex = '1000'; // ポップアップ表示時にz-indexを高くする
+        setTimeout(function() {
+          popupContainer.style.opacity = 1;
+        }, 10);
+      
+        // 3秒後にフェードアウトして非表示
+        setTimeout(function() {
+          popupContainer.style.opacity = 0;
+          // 完全に非表示にする
+          setTimeout(function() {
+            popupContainer.style.display = 'none';
+            popupContainer.style.zIndex = '0'; // ポップアップ非表示時にz-indexを低くする
+          }, 1500);
+        }, 3000);
+    }
+    
+
+      // 問題の回答結果をカウントして登録
+      function answerResultCount(id, answerResult) {
+        // 語句のObjectIdを取得
+        var quizWordObjectId = id;
+        // 回答結果を取得
+        var result = answerResult;
+        // Ajaxでサーバへ送信
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", "/solveQuestions", true);
+        xhr.setRequestHeader("Content-Type", "application/json");
+        xhr.send(JSON.stringify({ id: quizWordObjectId, answerResult: result }));
+
+        xhr.onload = function() {
+            if (xhr.status == 200) {
+                console.log("Count!:", xhr.responseText);
+            } else {
+                console.log("Error:", xhr.responseText);
+            }
+        };
+      }
+
+</script>
+{% endblock %}

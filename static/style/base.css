@@ -1,0 +1,258 @@
+
+body {
+background-color: #f7f7f7; /* 明るい背景色 */
+color: #333; /* 濃い文字色 */
+font-family: Arial, sans-serif; /* シンプルなフォント */
+}
+
+button {
+background-color: #007bff; /* ボタンの背景色 */
+color: white; /* ボタンの文字色 */
+border: none;
+padding: 10px 15px;
+margin: 10px;
+border-radius: 5px; /* 角を丸める */
+cursor: pointer;
+font-size: 16px;
+}
+
+button:hover {
+background-color: #0056b3; /* ホバー時の背景色 */
+}
+
+input, select, textarea {
+border: 1px solid #ddd;
+padding: 10px;
+margin: 10px 0;
+border-radius: 5px;
+/* width: calc(100% - 22px); /* 入力フィールドの幅調整 */
+}
+
+.hash-value {
+text-align: center; /* 中央揃え */
+margin-bottom: 20px; /* ボタンとの間にスペースを追加 */
+}
+
+/* チェックボックスCSS */
+.wordCheckbox {
+/* 表内のチェックボックス用のスタイル */
+display: inline-block; /* 例: インラインブロック要素として表示 */
+width: auto; /* 例: 幅を自動で設定 */
+margin: 5px; /* 例: チェックボックス周りにマージンを設定 */
+vertical-align: middle; /* 例: 垂直方向の配置を中央揃えに設定 */
+}
+
+/* solveQuestions.html */
+.question-label {
+display: block; /* ブロック要素として表示 */
+text-align: center; /* テキストを中央揃えに */
+margin: 5px 0; /* 上下の余白を設定 */
+}
+
+.question-radio {
+margin-right: 10px; /* ラジオボタンとテキストの間隔を設定 */
+}
+
+/* ポップアップのスタイリング */
+#popup-container {
+    position: fixed; /* 画面の中央に固定表示 */
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.5); /* 半透明の背景 */
+    z-index: 1000; /* 他の要素より上に表示 */
+    opacity: 0; /* 初期状態は透明（非表示） */
+    transition: opacity 1.5s ease-in-out; /* フェードイン・アウトのアニメーション */
+  }
+  
+#popup-content {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 5px;
+  text-align: center;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.question-container {
+  border: 1px solid #ccc;
+  padding: 10px;
+  margin-bottom: 10px;
+}
+
+.quiz-choices {
+  display: flex;
+  flex-direction: column;
+}
+
+.choice-container {
+  display: flex;
+  align-items: center;
+  margin-bottom: 5px;
+}
+
+input[type="radio"] {
+  margin-right: 10px; /* ラジオボタンとラベルの間隔 */
+  flex-shrink: 0; /* フレックスアイテムが縮小しないようにする */
+}
+
+.choice-container label {
+  flex-grow: 1;
+}
+
+/* Navbar & Navmenu color */
+:root {
+--background-navbar: rgba(55, 55, 55, 0.98);
+}
+
+.content {
+display: flex;
+flex-direction: column;
+align-items: center;
+justify-content: center;
+min-height: 100vh; /* ビューポートの高さに合わせてサイズを調整 */
+padding-top: 70px; /* ヘッダー分のスペース */
+}
+
+.header {
+background: var(--background-navbar);
+position: fixed;
+top: 0;
+width: 100%;
+height: 52px;
+z-index: 100; /* ヘッダーをコンテンツの前面に配置 */
+}
+
+/* Nav items */
+.menu {
+list-style: none;
+position: absolute;
+width: 100%;
+height: auto;
+top: 0;
+margin-top: 52px;
+padding: 0 0 10px 0;
+clear: both;
+background: var(--background-navbar);
+transition: 0.3192s cubic-bezier(0.04, 0.04, 0.12, 0.96) 0.1008s;
+transform: scale(1, 0);
+transform-origin: top;
+}
+
+/* Hamburger menu button */
+.menu-btn:checked ~ .menu {
+transform: scale(1, 1);
+transform-origin: top;
+transition: 0.3192s cubic-bezier(0.04, 0.04, 0.12, 0.96) 0.1008s;
+}
+
+/* Hamburger menbu text */
+.menu a {
+text-decoration: none;
+font-weight: 500;
+letter-spacing: 2px;
+font-size: 16px;
+text-transform: capitalize;
+color: #ddd;
+opacity: 0;
+transition: 0.5s;
+}
+
+.menu li {
+border-top: 1px solid rgb(75, 75, 75);
+padding: 15px 0;
+margin: 0 54px;
+opacity: 0;
+transition: 0.5s;
+}
+
+.menu-btn:checked ~ .menu a,
+.menu-btn:checked ~ .menu li {
+opacity: 1;
+transition: 0.3192s cubic-bezier(0.04, 0.04, 0.12, 0.96) 0.2s;
+}
+
+.menu-btn {
+display: none;
+}
+
+.menu-icon {
+display: inline-block;
+position: relative;
+cursor: pointer;
+padding: 24px 14px;
+-webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+}
+
+.navicon {
+background: #ddd;
+display: block;
+height: 3px;
+width: 26px;
+position: relative;
+transition: 0.3192s cubic-bezier(0.04, 0.04, 0.12, 0.96) 0.1008s;
+}
+
+.navicon:before,
+.navicon:after {
+content: "";
+display: block;
+height: 100%;
+width: 100%;
+position: absolute;
+background: #ddd;
+transition: 0.3192s cubic-bezier(0.04, 0.04, 0.12, 0.96) 0.1008s;
+}
+
+.navicon:before {
+top: 9px;
+}
+
+.navicon:after {
+bottom: 9px;
+}
+
+/* Hamburger Menu Animation Start */
+.menu-btn:checked ~ .menu-icon .navicon:before {
+transform: rotate(-45deg);
+}
+
+.menu-btn:checked ~ .menu-icon .navicon:after {
+transform: rotate(45deg);
+}
+
+.menu-btn:checked ~ .menu-icon:not(.steps) .navicon:before {
+top: 0;
+}
+.menu-btn:checked ~ .menu-icon:not(.steps) .navicon:after {
+bottom: 0;
+}
+
+.menu-btn:checked ~ .menu-icon .navicon {
+background: rgba(0, 0, 0, 0);
+transition: 0.2192s cubic-bezier(0.04, 0.04, 0.12, 0.96) 0.1008s;
+}
+/* Hamburger Menu Animation End */
+
+/* Navbar Container */
+.navtext-container {
+width: 100%;
+height: 52px;
+position: absolute;
+box-sizing: border-box;
+display: flex;
+justify-content: center;
+align-items: center;
+}
+
+/* Navbar Text */
+.navtext {
+position: absolute;
+text-transform: uppercase;
+color: #ddd;
+letter-spacing: 4px;
+font-size: 20px;
+}

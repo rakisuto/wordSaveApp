@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="content">
+    <div class="start-container">
+        <p>登録済みの単語数: {{ words|length }}語</p>
+        <button type="button" onclick="showQuestion()">問題解く</button>
+    </div>
+
+    <div id="popup-container" style="display: none;">
+        <div id="popup-content">
+          <p id="popup-message">正解/不正解</p>
+        </div>
+    </div>
+
+    <div id="question-container" style="display: none;">
+        <h2>次の語句の意味はどれか。</h2>
+        <p id="quiz-word" data-id="{{ words[0]._id }}">{{ words[0].word }}</p>
+        <div id="quiz-choices">
+            {% for word in words %}
+            <input type="radio" id="{{ word.word }}" name="answer" value="{{ word.word_mean }}">
+            <label for="{{ word.word }}">{{ word.word_mean }}</label><br>
+            {% endfor %}
+        </div>
+        <button id="submitAnswer" onclick="checkAnswer()">回答する</button>
+    </div>
+</div>
+
+<script>
+    function showQuestion() {
+        // create_question()を呼び出す
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", "/createQuestion", true);
+
+        xhr.onload = function() {
+            if (xhr.status == 200) {
+                // レスポンスを受け取って問題内容を更新する
+                /*
+                var newQuestions = JSON.parse(xhr.responseText);
+                updateQuestionContainer(newQuestions);
+                */
+                console.log(xhr.responseText);
+                // 問題を表示
+                document.getElementById('question-container').style.display = 'block';
+                // 開始ボタンを含むコンテナを非表示にする
+                document.querySelector('.start-container').style.display = 'none';
+
+            } else {
+                console.error("Error", xhr.responseText);
+            }
+        };
+
+        xhr.onerror = function() {
+            console.error("other error");
+        };
+
+        xhr.send();
+        
+    }
+    
+    function updateQuestionContainer(newQuestions) {
+        // 問題文の更新
+        var quizWordElement = document.getElementById('quiz-word');
+        quizWordElement.innerText = newQuestions[0].word;
+        quizWordElement.setAttribute("data-id", newQuestions[0]._id); // data-id 属性の更新
+    
+        // 選択肢の更新
+        var quizChoicesElement = document.getElementById('quiz-choices');
+        quizChoicesElement.innerHTML = ''; // 既存の選択肢をクリア
+    
+        newQuestions.forEach(function(question) {
+            var radioButton = document.createElement('input');
+            radioButton.type = 'radio';
+            radioButton.id = question.word;
+            radioButton.name = 'answer';
+            radioButton.value = question.word_mean;
+    
+            var label = document.createElement('label');
+            label.htmlFor = question.word;
+            label.innerText = question.word_mean;
+    
+            quizChoicesElement.appendChild(radioButton);
+            quizChoicesElement.appendChild(label);
+            quizChoicesElement.appendChild(document.createElement('br'));
+        });
+    }
+    
+     
+    function resetToStart() {
+        document.getElementById('question-container').style.display = 'none'; // 問題を非表示
+        document.querySelector('.start-container').style.display = 'block'; // 開始ボタンを表示
+    }
+
+    function checkAnswer() {
+        var correctAnswer = "{{ words[0].word_mean }}";
+        var selectedAnswer = document.querySelector('input[name="answer"]:checked').value;
+
+        if (selectedAnswer === correctAnswer) {
+            showPopup("正解です！", "True");
+            // カウント実行
+            correctAnswerCount();
+        } else {
+            showPopup("不正解です。", "False");
+        }
+    }
+
+    function showPopup(message, judge) {
+        var popupContainer = document.getElementById('popup-container');
+        var popupMessage = document.getElementById('popup-message');
+        
+        // メッセージを設定
+        popupMessage.textContent = message;
+      
+        // ポップアップを表示してフェードイン
+        popupContainer.style.display = 'flex';
+        setTimeout(function() {
+          popupContainer.style.opacity = 1;
+        }, 10); // 小さな遅延を設定してCSSの遷移を有効にする
+      
+        // 3秒後にフェードアウトして非表示
+        setTimeout(function() {
+          popupContainer.style.opacity = 0;
+          // 完全に非表示にする
+          setTimeout(function() {
+            popupContainer.style.display = 'none';
+            if (judge == "True") {
+                resetToStart(); // 問題のリセット
+            }
+          }, 1500); // 1.5秒のフェードアウトのアニメーション後
+        }, 3000);
+      }
+
+      // 問題の正解数をカウントして登録
+      function correctAnswerCount() {
+        // 語句のObjectIdを取得
+        var quizWordObjectId = document.getElementById('quiz-word').getAttribute('data-id');
+        // Ajaxでサーバへ送信
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", "/createQuestion", true);
+        xhr.setRequestHeader("Content-Type", "application/json");
+        xhr.send(JSON.stringify({ id: quizWordObjectId }));
+
+        xhr.onload = function() {
+            if (xhr.status == 200) {
+                console.log("Count!:", xhr.responseText);
+            } else {
+                console.log("Error:", xhr.responseText);
+            }
+        };
+      }
+
+</script>
+{% endblock %}

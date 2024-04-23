@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}
+Main Page
+{% endblock %}
+
+{% block content %}
+<div class="content">
+    
+        <!-- addHash.htmlへのリンク -->
+        <p><a href="/addHash">ハッシュ値追加ページへ</a></p>
+
+        <!-- addCategory.htmlへのリンク -->
+        <p><a href="/addCategory">カテゴリ追加ページへ</a></p>
+    
+        <!-- registWord.htmlへのリンク -->
+        <p><a href="/registWord">語句登録ページへ</a></p>
+
+        <!-- createQuestion.htmlへのリンク -->
+        <p><a href="/createQuestionMain">問題作成ページへ</a></p>
+        
+    
+        <!-- ログアウトボタン -->
+        <form action="/logout">
+            <button type="submit">Logout</button>
+        </form>
+</div>
+    
+{% endblock %}
+
